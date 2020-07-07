@@ -92,4 +92,34 @@ public class Tree {
 			frontOrder(localNode.rightChild);
 		}
 	}
+
+	/**
+	 * 中序遍历
+	 * @param localNode
+	 */
+	public void middleOrder(Node localNode) {
+		if(localNode != null) {
+			//中序遍历左子树
+			middleOrder(localNode.leftChild);
+			//访问根节点
+			System.out.println(localNode.data + ":" + localNode.sData);
+			//中序遍历右子树
+			middleOrder(localNode.rightChild);
+		}
+	}
+
+	/**
+	 * 后序遍历
+	 * @param localNode
+	 */
+	public void afterOrder(Node localNode) {
+		if(localNode != null) {
+			//后序遍历左子树
+			afterOrder(localNode.leftChild);
+			//后序遍历右子树
+			afterOrder(localNode.rightChild);
+			//访问根节点
+			System.out.println(localNode.data + ":" + localNode.sData);
+		}
+	}
 }
