@@ -1,2 +1,0 @@
-#org.springframework.boot.SpringApplicationRunListener=\
-#  com.redis.test.listener.MySpringListener
