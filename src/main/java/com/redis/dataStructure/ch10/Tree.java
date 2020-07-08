@@ -71,11 +71,94 @@ public class Tree {
 	}
 
 	/**
-	 * 删除节点
+	 *  删除节点
+	 * 删除节点存在 3 种情况，这 3 种情况分别如下：
+	 * 1) 该节点是叶子节点，也就是说没有左右子节点，可以直接删除
+	 * 2) 该节点存在左节点或者右节点，删除后需要对子节点移动
+	 * 3) 该节点同时存在左右子节点，不能简单的删除，但是可以通过和后继节点交换后转换为前两种情况
 	 * @param value
 	 */
 	public void delete(long value) {
+		Node current = root;
+		if(current.data == value) {
+			root = null;
+			return;
+		}
 
+		Node parent = current;
+		while(current.data != value) {
+			parent = current;
+			if(current.data > value) {
+				current = current.leftChild;
+			}else if(current.data < value){
+				current = current.rightChild;
+			}
+			if(current == null) {
+				System.out.println("该节点不存在");
+				return;
+			}
+		}
+		//到了这里，current就是该节点
+		//1）如果是叶子节点
+		if(current.leftChild == null && current.rightChild == null) {
+			//左子节点
+			if(parent.leftChild == current) {
+				parent.leftChild = null;
+			}else {
+				//右子节点
+				parent.rightChild = null;
+			}
+		}else if(current.leftChild != null && current.rightChild == null) {
+			//2)如果是左子节点不能为空，右子节点为空
+			//左子节点
+			if(parent.leftChild == current) {
+				parent.leftChild = current.leftChild;
+			}else {
+				//右子节点
+				parent.rightChild = current.leftChild;
+			}
+		}else if(current.leftChild == null && current.rightChild != null) {
+			//3)如果是左子节点为空，右子节点不为空
+			if(parent.leftChild == current) {
+				parent.leftChild = current.rightChild;
+			}else {
+				parent.rightChild = current.rightChild;
+			}
+		}else {
+			//4)如果左右子节点都不为空，这里就分用左子树中最大的那个节点替换被删除的节点，或用右子树中最小的那个节点替换被删除的节点
+			//这里采用寻找右子树中最小的那个节点去替换被删除节点的位置
+			Node c;
+			if(parent.leftChild == current) {
+				c = findRightMinNode(current);
+				parent.leftChild = c;
+			}else {
+				c = findRightMinNode(current);
+				parent.rightChild = c;
+			}
+			c.leftChild = current.leftChild;
+			c.rightChild = current.rightChild;
+		}
+	}
+
+	/**
+	 * 查找右子树中最小节点并返回
+	 * @param current
+	 * @return
+	 */
+	private Node findRightMinNode(Node current) {
+		Node c = current.rightChild;
+		Node p = c;
+		while (c.leftChild != null) {
+			p = c;
+			c = c.leftChild;
+		}
+		//更新右子树中最小节点的父节点的左节点
+		if (c.rightChild != null) {
+			p.leftChild = c.rightChild;
+		} else {
+			p.leftChild = null;
+		}
+		return c;
 	}
 
 	/**
