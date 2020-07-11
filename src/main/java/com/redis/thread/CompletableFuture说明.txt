@@ -1,0 +1,32 @@
+原理：
+4.1.从注释看：
+JDK1.8才新加入的一个实现类，实现了Future<T>, CompletionStage<T>2个接口，JDK注释如下图：
+
+译文（没兴趣的可以跳过）：
+当一个Future可能需要显示地完成时，使用CompletionStage接口去支持完成时触发的函数和操作。当2个以上线程同时尝试完成、异常完成、取消一个CompletableFuture时，只有一个能成功。
+CompletableFuture实现了CompletionStage接口的如下策略：
+1.为了完成当前的CompletableFuture接口或者其他完成方法的回调函数的线程，提供了非异步的完成操作。
+2.没有显式入参Executor的所有async方法都使用ForkJoinPool.commonPool()为了简化监视、调试和跟踪，所有生成的异步任务都是标记接口AsynchronousCompletionTask的实例。
+3.所有的CompletionStage方法都是独立于其他共有方法实现的，因此一个方法的行为不会受到子类中其他方法的覆盖。
+CompletableFuture实现了Futurre接口的如下策略：
+1.CompletableFuture无法直接控制完成，所以cancel操作被视为是另一种异常完成形式。方法isCompletedExceptionally可以用来确定一个CompletableFuture是否以任何异常的方式完成。
+2.以一个CompletionException为例，方法get()和get(long,TimeUnit)抛出一个ExecutionException，对应CompletionException。为了在大多数上下文中简化用法，这个类还定义了方法join()和getNow，而不是直接在这些情况中直接抛出CompletionException。
+
+4.2.CompletionStage接口实现流式编程：
+JDK8新增接口，此接口包含38个方法...是的，你没看错，就是38个方法。这些方法主要是为了支持函数式编程中流式处理。
+
+4.3.CompletableFuture中4个异步执行任务静态方法：
+
+如上图，其中supplyAsync用于有返回值的任务，runAsync则用于没有返回值的任务。Executor参数可以手动指定线程池，否则默认ForkJoinPool.commonPool()系统级公共线程池，注意：这些线程都是Daemon线程，主线程结束Daemon线程不结束，只有JVM关闭时，生命周期终止。
+4.4.组合CompletableFuture：
+thenCombine()： 先完成当前CompletionStage和other 2个CompletionStage任务，然后把结果传参给BiFunction进行结果合并操作。
+
+thenCompose()：第一个CompletableFuture执行完毕后，传递给下一个CompletionStage作为入参进行操作。
+
+demo:
+JDK CompletableFuture  自带多任务组合方法allOf和anyOf
+allOf是等待所有任务完成，构造后CompletableFuture完成
+anyOf是只要有一个任务完成，构造后CompletableFuture就完成
+
+方式一：循环创建CompletableFuture list,调用sequence()组装返回一个有返回值的CompletableFuture，返回结果get()获取
+方式二：全流式处理转换成CompletableFuture[]+allOf组装成一个无返回值CompletableFuture，join等待执行完毕。返回结果whenComplete获取。---》推荐
